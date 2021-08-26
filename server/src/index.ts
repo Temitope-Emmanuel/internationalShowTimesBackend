@@ -9,16 +9,19 @@ const upload = multer();
 
 import './models/UrlShorten';
 import './models/UserSchema';
+import "./models/MetaSchema"
 
 dotenv.config();
 
 import authRoutes from './routes/auth';
 import urlRoutes from './routes/urlShorten';
+import metaRoutes from "./routes/meta"
 // const DB = process.env.DB;
 const DB_HOST = process.env.DB_HOST;
 
 // const dbURI = `mongodb://${DB_HOST}/${DB}`;
 const dbURI = `mongodb://localhost:27017/${DB_HOST}`;
+const PORT = process.env.PORT || 3000;
 const connectOptions = {
   keepAlive: true,
   reconnectTries: Number.MAX_VALUE,
@@ -41,8 +44,11 @@ app.use(upload.none());
 app.use(cors());
 app.options('*', cors());
 authRoutes(app);
+metaRoutes(app)
 urlRoutes(app);
 
-app.listen(process.env.PORT);
+app.listen(PORT,() => {
+  console.log("Listening successfully, ",PORT)
+});
 
 export default app;

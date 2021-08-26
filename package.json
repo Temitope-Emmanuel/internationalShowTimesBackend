@@ -11,5 +11,12 @@
     "install": "yarn run server-install",
     "server-test": "cd ./server && yarn run test",
     "test": "yarn run server-test"
+  },
+  "dependencies": {
+    "get-urls": "^10.0.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.12"
   }
 }
