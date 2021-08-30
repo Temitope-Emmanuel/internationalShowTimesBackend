@@ -1,4 +1,4 @@
-# Internation ShowTimes Frontend 
+# Internation ShowTimes Backend
 
 Original templates by Josiah Adegboye.
 
@@ -10,7 +10,7 @@ First clone the repo with
 Then 
 
 ```
-cd ./internationalShowTimesFrontend
+cd ./internationalShowTimesBackend
 ```
 
 Next, start the services with docker
@@ -39,7 +39,5 @@ Next run
 ```
 yarn run test
 ```
-
-Running the above from the project root folder runs tests for both the vue app and the express server. 
 
 Created by Temitope Emamnuel Ojo
