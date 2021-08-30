@@ -9,13 +9,13 @@ const upload = multer();
 
 import './models/UrlShorten';
 import './models/UserSchema';
-import "./models/MetaSchema"
+import './models/MetaSchema';
 
 dotenv.config();
 
 import authRoutes from './routes/auth';
 import urlRoutes from './routes/urlShorten';
-import metaRoutes from "./routes/meta"
+import metaRoutes from './routes/meta';
 // const DB = process.env.DB;
 const DB_HOST = process.env.DB_HOST;
 
@@ -44,11 +44,11 @@ app.use(upload.none());
 app.use(cors());
 app.options('*', cors());
 authRoutes(app);
-metaRoutes(app)
+metaRoutes(app);
 urlRoutes(app);
 
-app.listen(PORT,() => {
-  console.log("Listening successfully, ",PORT)
+app.listen(PORT, () => {
+  console.log('Listening successfully, ', PORT);
 });
 
 export default app;
