@@ -12,9 +12,9 @@ const handleDuplicateKeyError = (err: any, res: Response) => {
 };
 
 const handleValidationError = (err: any, res: Response) => {
-  let errors = Object.values(err.errors).map((el: any) => el.message);
-  let fields = Object.values(err.errors).map((el: any) => el.path);
-  let code = 400;
+  const errors = Object.values(err.errors).map((el: any) => el.message);
+  const fields = Object.values(err.errors).map((el: any) => el.path);
+  const code = 400;
 
   if (errors.length > 1) {
     const formattedErrors = errors.join(' ');
