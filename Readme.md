@@ -1,21 +1,16 @@
-# URL Shortner 
+# Internation ShowTimes Frontend 
 
-Created by Josiah Adegboye.
-
-Made with ❤️, Express and Vue
+Original templates by Josiah Adegboye.
 
 ## How to run
 
 First clone the repo with
 
-```
-git clone https://github.com/i-mighty/url-shortner
-```
 
 Then 
 
 ```
-cd ./url-shortner
+cd ./internationalShowTimesFrontend
 ```
 
 Next, start the services with docker
@@ -47,4 +42,4 @@ yarn run test
 
 Running the above from the project root folder runs tests for both the vue app and the express server. 
 
-Created by Josiah Adegboye
+Created by Temitope Emamnuel Ojo
