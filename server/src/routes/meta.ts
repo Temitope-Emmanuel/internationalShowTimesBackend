@@ -43,24 +43,24 @@ export default (app: Express) => {
   >('/get-meta', async (req, res) => {
     try {
       const scrappedData = await scrapMetaTags(req.body.text);
-      let id:string;
+      let id: string;
       if (scrappedData) {
-        const foundMeta = await Meta.findById({url:req.body.text})
-        if(foundMeta && scrappedData[0]){
-            foundMeta.meta = scrappedData[0]?.meta;
-            foundMeta.favicon = scrappedData[0]?.favicon || "";
-            foundMeta.title = scrappedData[0]?.title;
-            await foundMeta.save()
-            id = foundMeta.id
-        }else{
+        const foundMeta = await Meta.findById({ url: req.body.text });
+        if (foundMeta && scrappedData[0]) {
+          foundMeta.meta = scrappedData[0]?.meta;
+          foundMeta.favicon = scrappedData[0]?.favicon || '';
+          foundMeta.title = scrappedData[0]?.title;
+          await foundMeta.save();
+          id = foundMeta.id;
+        } else {
           const savedData = new Meta(scrappedData[0]);
           await savedData.save();
-          id = savedData.id
+          id = savedData.id;
         }
         return res.status(200).json({
           data: scrappedData,
           message: 'Successfully saved meta',
-          id
+          id,
         });
       } else {
         return res.status(200).json({
