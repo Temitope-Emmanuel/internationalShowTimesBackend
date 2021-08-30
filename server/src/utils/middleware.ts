@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import expressJwt from 'express-jwt';
 import config from './config';
 import jwt from 'jsonwebtoken';
 
@@ -27,4 +28,10 @@ const addAuth = async function(
   }
 };
 
-export default { addAuth };
+const requireSignIn = expressJwt({
+  secret: config.jwtSecret,
+  userProperty: 'auth',
+  algorithms: ['HS256'],
+});
+
+export { addAuth, requireSignIn };

@@ -1,2 +1,2 @@
-import './UrlShorten';
+import './MetaSchema';
 import './UserSchema';

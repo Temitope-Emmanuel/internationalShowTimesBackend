@@ -2,35 +2,40 @@ import { Express } from 'express';
 import Meta from '../models/MetaSchema';
 import { Meta as MetaType } from '../models/MetaSchema/types';
 import * as cheerio from 'cheerio';
-import getUrls from 'get-urls';
+import validUrl from 'valid-url';
 import fetch from 'node-fetch';
 import mongoose from 'mongoose';
+import { requireSignIn } from '../utils/middleware';
+// import puppeteer from "puppeteer"
 
-const scrapMetaTags = (text: string) => {
-  const urls = Array.from(getUrls(text));
-  const request = urls.map(async url => {
-    try {
-      const res = await fetch(url);
-      const html = await res.text();
-      const $ = cheerio.load(html);
-      const meta = $('meta').toArray();
-      const metaResult: any[] = [];
-      meta.map(item => {
-        metaResult.push({ ...item.attribs });
-      });
-      return {
-        url,
-        meta: metaResult,
-        title: $('title')
-          .first()
-          .text(),
-        favicon: $('link[rel="shortcut icon"]').attr('href'),
-      };
-    } catch (err) {
-      console.log('error in scraping data', { err });
-    }
-  });
-  return Promise.all(request);
+// const usePuppeteer = async (url:string) => {
+//   const browser = await puppeteer.launch({
+//     headless:true
+//   })
+//   const page = await browser.newPage();
+//   await page.goto(url)
+//   const data = await page.evaluate(() => {
+
+//   })
+// }
+
+const scrapMetaTags = async (url: string) => {
+  try {
+    const res = await fetch(url);
+    const html = await res.text();
+    const $ = cheerio.load(html);
+    const meta = $('meta').toArray();
+    const metaResult: any[] = [];
+    meta.map(item => {
+      metaResult.push({ ...item.attribs });
+    });
+    return {
+      url,
+      meta: metaResult,
+    };
+  } catch (err) {
+    console.log('error in scraping data', { err });
+  }
 };
 
 export default (app: Express) => {
@@ -38,55 +43,81 @@ export default (app: Express) => {
     {},
     {},
     {
-      text: string;
+      url: string;
     }
-  >('/get-meta', async (req, res) => {
+  >('/get-meta', requireSignIn, async (req, res) => {
     try {
-      const scrappedData = await scrapMetaTags(req.body.text);
-      let id: string;
-      if (scrappedData) {
-        const foundMeta = await Meta.findById({ url: req.body.text });
-        if (foundMeta && scrappedData[0]) {
-          foundMeta.meta = scrappedData[0]?.meta;
-          foundMeta.favicon = scrappedData[0]?.favicon || '';
-          foundMeta.title = scrappedData[0]?.title;
-          await foundMeta.save();
-          id = foundMeta.id;
-        } else {
-          const savedData = new Meta(scrappedData[0]);
-          await savedData.save();
-          id = savedData.id;
-        }
-        return res.status(200).json({
-          data: scrappedData,
-          message: 'Successfully saved meta',
-          id,
+      if (!validUrl.isUri(req.body.url)) {
+        return res.status(400).json({
+          message: 'The url is not valid',
         });
-      } else {
+      }
+      const scrappedData = await scrapMetaTags(req.body.url);
+      if (!scrappedData) {
         return res.status(200).json({
           message: 'No meta was found',
         });
       }
+      let id: string;
+      let data;
+      const foundMeta = await Meta.findOne({ url: req.body.url });
+      const date = new Date().toJSON();
+      if (foundMeta && scrappedData.meta) {
+        foundMeta.meta = [
+          ...(foundMeta.meta as any),
+          {
+            date,
+            meta: scrappedData.meta,
+          },
+        ];
+        await foundMeta.save();
+        data = foundMeta;
+        id = foundMeta.id;
+      } else {
+        const { url, meta, title, favicon } = scrappedData as any;
+        const savedData = new Meta({
+          url,
+          meta: [
+            {
+              date,
+              meta,
+            },
+          ],
+          title,
+          favicon,
+        });
+        await savedData.save();
+        data = savedData;
+        id = savedData.id;
+      }
+      return res.status(200).json({
+        id,
+        data: scrappedData,
+        message: 'Successfully saved meta',
+        updatedAt: data.updatedAt,
+        createdAt: data.createdAt,
+      });
     } catch (err) {
-      console.log("there's been an err ", { err });
       if (err.code == 11000) {
         return res.status(401).json({
           message: 'Error This username is already taken',
         });
       }
-      res.status(401).json({
+      console.log({ err });
+      return res.status(401).json({
         message: 'Something Went Wrong :(',
         error: err.message || err,
       });
     }
   });
+
   app.get<
     {
       metaId: string;
     },
     {},
     {}
-  >('/get-meta/:metaId', async (req, res) => {
+  >('/get-meta/:metaId', requireSignIn, async (req, res) => {
     if (!mongoose.isValidObjectId(req.params['metaId'])) {
       return res.status(400).json({
         message: 'meta id is not valid',
@@ -94,7 +125,6 @@ export default (app: Express) => {
     }
     try {
       const foundMeta = await Meta.findById(req.params['metaId']);
-      console.log('This is the found meta', { foundMeta });
       if (foundMeta) {
         return res.status(200).json({
           message: 'Query successful',
@@ -118,13 +148,24 @@ export default (app: Express) => {
       });
     }
   });
-  app.post<{}, {}, MetaType>('/post-meta/', async (req, res) => {
+
+  app.post<{}, {}, MetaType>('/post-meta/', requireSignIn, async (req, res) => {
     try {
+      console.log({ body: req.body });
+      if (!validUrl.isUri(req.body.url)) {
+        return res.status(400).json({
+          message: 'The url is not valid',
+        });
+      }
+      const date = new Date().toJSON();
       const newMeta = {
         url: req.body.url,
-        favicon: req.body.favicon,
-        title: req.body.title,
-        meta: req.body.meta,
+        meta: [
+          {
+            date,
+            meta: req.body.meta,
+          },
+        ],
       };
       const savedMeta = new Meta(newMeta);
       await savedMeta.save();

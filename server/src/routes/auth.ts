@@ -52,8 +52,6 @@ export default (app: Express) => {
           return res.status(401).json({ error: 'User not Found !!!' });
         }
         if (!user.authenticate(req.body.password)) {
-          console.log('This is the req.body', req.body.password);
-          console.log(user.authenticate(req.body.password));
           return res.status(401).json({
             error: "Password don't match",
           });
@@ -66,7 +64,6 @@ export default (app: Express) => {
           },
         });
       } else {
-        console.log('Lack of credential');
         return res.status(401).json({
           error: 'Please submit the required fields username and password',
         });

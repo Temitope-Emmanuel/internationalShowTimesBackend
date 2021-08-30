@@ -7,17 +7,16 @@ import cors from 'cors';
 
 const upload = multer();
 
-import './models/UrlShorten';
 import './models/UserSchema';
 import './models/MetaSchema';
 
 dotenv.config();
 
 import authRoutes from './routes/auth';
-import urlRoutes from './routes/urlShorten';
 import metaRoutes from './routes/meta';
+import errorController from './utils/errorController';
 // const DB = process.env.DB;
-const DB_HOST = process.env.DB_HOST;
+const DB_HOST = 'projectvOO';
 
 // const dbURI = `mongodb://${DB_HOST}/${DB}`;
 const dbURI = `mongodb://localhost:27017/${DB_HOST}`;
@@ -45,7 +44,8 @@ app.use(cors());
 app.options('*', cors());
 authRoutes(app);
 metaRoutes(app);
-urlRoutes(app);
+
+app.use(errorController);
 
 app.listen(PORT, () => {
   console.log('Listening successfully, ', PORT);

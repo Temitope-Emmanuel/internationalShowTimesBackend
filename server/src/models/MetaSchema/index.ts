@@ -9,8 +9,13 @@ const metaSchema: Schema = new Schema(
     favicon: String,
     meta: [
       {
-        type: mongoose.Schema.Types.Map,
-        of: String,
+        date: Date,
+        meta: [
+          {
+            type: mongoose.Schema.Types.Map,
+            of: String,
+          },
+        ],
       },
     ],
   },

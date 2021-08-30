@@ -25,7 +25,6 @@ const UserSchema: Schema = new Schema(
 
 UserSchema.virtual('password')
   .set(function(this: User, password: string) {
-    console.log('this is the password virtual', password);
     this._password = password;
     this.salt = this.makeSalt();
     this.hashedPassword = this.encryptPassword(password);
@@ -35,7 +34,6 @@ UserSchema.virtual('password')
   });
 
 UserSchema.path('hashedPassword').validate(function(this: User) {
-  console.log('we are validating the request', this._password);
   if (this._password && this._password.length < 6) {
     this.invalidate('password', 'Password must be at least 6 character');
     if (this.isNew && !this._password) {
